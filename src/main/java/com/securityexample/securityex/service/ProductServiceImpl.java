@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -20,34 +19,57 @@ public class ProductServiceImpl implements ProductService {
         this.repository = repository;
     }
 
-    public Optional<Product> getProductById(Long id) {
+    public Product getProductById(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Invalid product ID: " + id);
+        }
         logger.debug("Fetching product with id {}", id);
-        return repository.findById(id);
+        return repository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " was not found"));
     }
 
     public List<Product> getProductByName(String name) {
         logger.debug("Fetching product with name {}", name);
-        return repository.findProductByName(name);
+        List<Product> products = repository.findProductByName(name);
+        if (products.isEmpty()) {
+            throw new ProductNotFoundException("No products found with name " + name);
+        }
+        return products;
     }
 
     public List<Product> getProductsByCategory(String category) {
         logger.debug("Fetching products with category {}", category);
-        return repository.findProductByCategory(category);
+        List<Product> products = repository.findProductByCategory(category);
+        if (products.isEmpty()) {
+            throw new ProductNotFoundException("No products found in category " + category);
+        }
+        return products;
     }
 
     public List<Product> findAllProductsByPriceAsc() {
         logger.debug("Fetching products sorted by price ascending");
-        return repository.findAllProductsByPriceAsc();
+        List<Product> products = repository.findAllProductsByPriceAsc();
+        if (products.isEmpty()) {
+            throw new ProductNotFoundException("No products found ordered by price ascending");
+        }
+        return products;
     }
 
     public List<Product> findAllProductsByPriceDesc() {
         logger.debug("Fetching products sorted by price descending");
-        return repository.findAllByOrderByPriceDesc();
+        List<Product> products = repository.findAllByOrderByPriceDesc();
+        if (products.isEmpty()) {
+            throw new ProductNotFoundException("No products found ordered by price descending");
+        }
+        return products;
     }
 
     public List<Product> getAllProducts() {
         logger.debug("Fetching all products");
-        return repository.findAll();
+        List<Product> products = repository.findAll();
+        if (products.isEmpty()) {
+            throw new ProductNotFoundException("No products found");
+        }
+        return products;
     }
 
     public Product saveProduct(Product product) {
@@ -55,31 +77,22 @@ public class ProductServiceImpl implements ProductService {
         return repository.save(product);
     }
 
-
     public void deleteProduct(Long id) {
+        // Reuse getProductById to handle validation and existence check
         logger.debug("Deleting product by id {}", id);
-        Optional<Product> product = repository.findById(id);
-        if (product.isPresent()) {
-            repository.deleteById(id);
-        } else {
-            String errorMessage = "Product with ID " + id + " not found";
-            throw new ProductNotFoundException(errorMessage);
-        }
+        getProductById(id);
+        repository.deleteById(id);
     }
 
-    @Override
+
     public Product updateProduct(Long id, Product product) {
+        // Reuse getProductById to handle validation and existence check
+        Product existingProduct = getProductById(id);
         logger.debug("Updating product with id {}", id);
-        Optional<Product> optionalProduct = repository.findById(id);
-        if (optionalProduct.isPresent()) {
-            Product existingProduct = optionalProduct.get();
-            existingProduct.setName(product.getName());
-            existingProduct.setCategory(product.getCategory());
-            existingProduct.setPrice(product.getPrice());
-            existingProduct.setDescription(product.getDescription());
-            return repository.save(existingProduct);
-        } else {
-            return null;
-        }
+        existingProduct.setName(product.getName());
+        existingProduct.setCategory(product.getCategory());
+        existingProduct.setPrice(product.getPrice());
+        existingProduct.setDescription(product.getDescription());
+        return repository.save(existingProduct);
     }
 }

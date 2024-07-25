@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -34,81 +33,100 @@ class ProductControllerTest {
         // No need to manually initialize mocks with MockitoAnnotations.openMocks(this) here
     }
 
+    // Happy Path
+
     @Test
     void testGetProductById() throws Exception {
         Product product = new Product("Product", "Category", 100.0, "Description");
         product.setId(1L);
 
-        when(productService.getProductById(1L)).thenReturn(Optional.of(product));
+        when(productService.getProductById(1L)).thenReturn(product);
 
-        mockMvc.perform(get("/api/products/{id}", 1L))
+        mockMvc.perform(get("/api/products/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Product"));
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Product"))
+                .andExpect(jsonPath("$.category").value("Category"))
+                .andExpect(jsonPath("$.price").value(100.0))
+                .andExpect(jsonPath("$.description").value("Description"));
+
+        verify(productService).getProductById(1L);
     }
 
     @Test
     void testGetProductByName() throws Exception {
         Product product = new Product("Product", "Category", 100.0, "Description");
-        List<Product> products = List.of(product);
+        List<Product> products = Collections.singletonList(product);
 
         when(productService.getProductByName("Product")).thenReturn(products);
 
-        mockMvc.perform(get("/api/products/name/{name}", "Product"))
+        mockMvc.perform(get("/api/products/name/Product"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Product"));
+
+        verify(productService).getProductByName("Product");
     }
 
     @Test
     void testGetProductByCategory() throws Exception {
         Product product = new Product("Product", "Category", 100.0, "Description");
-        List<Product> products = List.of(product);
+        List<Product> products = Collections.singletonList(product);
 
         when(productService.getProductsByCategory("Category")).thenReturn(products);
 
-        mockMvc.perform(get("/api/products/category/{category}", "Category"))
+        mockMvc.perform(get("/api/products/category/Category"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].category").value("Category"));
+
+        verify(productService).getProductsByCategory("Category");
     }
 
     @Test
-    void testListByPricesAsc() throws Exception {
+    void testListAllProductsByPricesAsc() throws Exception {
         Product product = new Product("Product", "Category", 100.0, "Description");
-        List<Product> products = List.of(product);
+        List<Product> products = Collections.singletonList(product);
 
         when(productService.findAllProductsByPriceAsc()).thenReturn(products);
 
         mockMvc.perform(get("/api/products/price/asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].price").value(100.0));
+
+        verify(productService).findAllProductsByPriceAsc();
     }
 
     @Test
-    void testListByPricesDesc() throws Exception {
+    void testListAllProductsByPricesDesc() throws Exception {
         Product product = new Product("Product", "Category", 100.0, "Description");
-        List<Product> products = List.of(product);
+        List<Product> products = Collections.singletonList(product);
 
         when(productService.findAllProductsByPriceDesc()).thenReturn(products);
 
         mockMvc.perform(get("/api/products/price/desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].price").value(100.0));
+
+        verify(productService).findAllProductsByPriceDesc();
     }
 
     @Test
     void testGetAllProducts() throws Exception {
         Product product = new Product("Product", "Category", 100.0, "Description");
-        List<Product> products = List.of(product);
+        List<Product> products = Collections.singletonList(product);
 
         when(productService.getAllProducts()).thenReturn(products);
 
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Product"));
+
+        verify(productService).getAllProducts();
     }
 
     @Test
     void testCreateProduct() throws Exception {
         Product product = new Product("Product", "Category", 100.0, "Description");
+        product.setId(1L);
 
         when(productService.saveProduct(any(Product.class))).thenReturn(product);
 
@@ -116,110 +134,147 @@ class ProductControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(product)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Product"));
+
+        verify(productService).saveProduct(any(Product.class));
     }
 
     @Test
-    void testDeleteProductSuccess() throws Exception {
-        // Test scenario where the product exists and is successfully deleted
-        doNothing().when(productService).deleteProduct(1L); // Mock deleteProduct to do nothing
+    void testDeleteProduct() throws Exception {
+        doNothing().when(productService).deleteProduct(1L);
 
         mockMvc.perform(delete("/api/products/1"))
-                .andExpect(status().isNoContent()); // Expect 204 No Content
+                .andExpect(status().isNoContent());
+
+        verify(productService).deleteProduct(1L);
     }
 
     @Test
     void testUpdateProduct() throws Exception {
-        Product existingProduct = new Product("Product", "Category", 100.0, "Description");
-        existingProduct.setId(1L);
-        Product updatedProduct = new Product("Updated Product", "Category", 200.0, "Updated Description");
+        Product product = new Product("Product", "Category", 100.0, "Description");
+        product.setId(1L);
+        Product updatedProduct = new Product("UpdatedProduct", "UpdatedCategory", 150.0, "UpdatedDescription");
         updatedProduct.setId(1L);
 
         when(productService.updateProduct(eq(1L), any(Product.class))).thenReturn(updatedProduct);
 
-        mockMvc.perform(put("/api/products/{id}", 1L)
+        mockMvc.perform(put("/api/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(updatedProduct)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Updated Product"));
+                .andExpect(jsonPath("$.name").value("UpdatedProduct"));
+
+        verify(productService).updateProduct(eq(1L), any(Product.class));
     }
 
-    // Negative Test Cases
-
-    @Test
-    void testGetAllProductsNotFound() throws Exception {
-        // Test scenario where no products are found
-        when(productService.getAllProducts()).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(get("/api/products"))
-                .andExpect(status().isNotFound());
-    }
+    // Negative cases
 
     @Test
     void testGetProductByIdNotFound() throws Exception {
-        // Test scenario where the product ID does not exist
-        when(productService.getProductById(1L)).thenReturn(Optional.empty());
+        when(productService.getProductById(1L)).thenThrow(ProductNotFoundException.class);
 
         mockMvc.perform(get("/api/products/1"))
                 .andExpect(status().isNotFound());
+
+        verify(productService).getProductById(1L);
     }
 
     @Test
     void testGetProductByNameNotFound() throws Exception {
-        // Test scenario where no products match the given name
-        when(productService.getProductByName("NonExistentName")).thenReturn(Collections.emptyList());
+        when(productService.getProductByName("NonExistentName")).thenThrow(ProductNotFoundException.class);
 
         mockMvc.perform(get("/api/products/name/NonExistentName"))
                 .andExpect(status().isNotFound());
+
+        verify(productService).getProductByName("NonExistentName");
     }
 
     @Test
-    void testGetProductsByCategoryNotFound() throws Exception {
-        // Test scenario where no products match the given category
-        when(productService.getProductsByCategory("NonExistentCategory")).thenReturn(Collections.emptyList());
+    void testGetProductByCategoryNotFound() throws Exception {
+        when(productService.getProductsByCategory("NonExistentCategory")).thenThrow(ProductNotFoundException.class);
 
         mockMvc.perform(get("/api/products/category/NonExistentCategory"))
                 .andExpect(status().isNotFound());
+
+        verify(productService).getProductsByCategory("NonExistentCategory");
     }
 
     @Test
-    void testFindAllProductsByPriceAscEmptyList() throws Exception {
-        // Test scenario where no products are available
-        when(productService.findAllProductsByPriceAsc()).thenReturn(Collections.emptyList());
+    void testListAllProductsByPricesAscNotFound() throws Exception {
+        when(productService.findAllProductsByPriceAsc()).thenThrow(ProductNotFoundException.class);
 
         mockMvc.perform(get("/api/products/price/asc"))
                 .andExpect(status().isNotFound());
+
+        verify(productService).findAllProductsByPriceAsc();
     }
 
     @Test
-    void testFindAllProductsByPriceDescEmptyList() throws Exception {
-        // Test scenario where no products are available
-        when(productService.findAllProductsByPriceDesc()).thenReturn(Collections.emptyList());
+    void testListAllProductsByPricesDescNotFound() throws Exception {
+        when(productService.findAllProductsByPriceDesc()).thenThrow(ProductNotFoundException.class);
 
         mockMvc.perform(get("/api/products/price/desc"))
                 .andExpect(status().isNotFound());
+
+        verify(productService).findAllProductsByPriceDesc();
+    }
+
+    @Test
+    void testGetAllProductsNotFound() throws Exception {
+        when(productService.getAllProducts()).thenThrow(ProductNotFoundException.class);
+
+        mockMvc.perform(get("/api/products"))
+                .andExpect(status().isNotFound());
+
+        verify(productService).getAllProducts();
+    }
+
+    @Test
+    void testDeleteProductNotFound() throws Exception {
+        doThrow(ProductNotFoundException.class).when(productService).deleteProduct(1L);
+
+        mockMvc.perform(delete("/api/products/1"))
+                .andExpect(status().isNotFound());
+
+        verify(productService).deleteProduct(1L);
     }
 
     @Test
     void testUpdateProductNotFound() throws Exception {
-        // Test scenario where the product to update does not exist
-        Product product = new Product("New Product", "Category", 200.0, "Updated Description");
+        Product product = new Product("Product", "Category", 100.0, "Description");
         product.setId(1L);
 
-        when(productService.updateProduct(1L, product)).thenReturn(null);
+        when(productService.updateProduct(eq(1L), any(Product.class))).thenThrow(ProductNotFoundException.class);
 
         mockMvc.perform(put("/api/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(product)))
                 .andExpect(status().isNotFound());
+
+        verify(productService).updateProduct(eq(1L), any(Product.class));
     }
+
+    // Errors Tests
+    @Test
+    void testHandleMethodArgumentTypeMismatchException() throws Exception {
+        mockMvc.perform(get("/api/products/abc")) // Simulate invalid path variable
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Invalid value 'abc' for parameter 'id'")); // Adjusted to match actual behavior
+    }
+
 
     @Test
-    void testDeleteProductNotFound() throws Exception {
-        // Test scenario where the product to delete does not exist
-        doThrow(new ProductNotFoundException("Product with ID 1 not found")).when(productService).deleteProduct(1L);
+    void testHandleGenericException() throws Exception {
+        // Simulate a situation where a generic exception would be thrown
+        when(productService.getProductById(anyLong())).thenThrow(new RuntimeException("Unexpected error"));
 
-        mockMvc.perform(delete("/api/products/1"))
-                .andExpect(status().isNotFound()); // Expect 404 Not Found
+        mockMvc.perform(get("/api/products/1"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string("An unexpected error occurred. Please try again later."));
+
+        // Verify that the exception handling method is not explicitly called
+        // The mockMvc call itself should cover this
     }
+
 }
