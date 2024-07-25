@@ -89,6 +89,7 @@ Thumbs.db
 .env
 
 # Maven Wrapper
-.mvn/wrapper/maven-wrapper.jar
-mvnw
-mvnw.cmd
+!mvnw
+!mvnw.cmd
+!**/mvn/wrapper/maven-wrapper.jar
+!**/mvn/wrapper/maven-wrapper.properties
