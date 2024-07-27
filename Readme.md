@@ -57,15 +57,15 @@ The project includes unit and integration tests. To run the tests, use the follo
 ## API Endpoints
 ### Products
 ````
-GET /api/products - Get all products
-GET /api/products/{id} - Get product by ID
-GET /api/products/name/{name} - Get products by name
-GET /api/products/category/{category} - Get products by category
-GET /api/products/price/asc - Get products sorted by price ascending
-GET /api/products/price/desc - Get products sorted by price descending
-POST /api/products - Create a new product
-PUT /api/products/{id} - Update an existing product
-DELETE /api/products/{id} - Delete a product by ID
+GET /api/v1/products - Get all products
+GET /api/v1/products/{id} - Get product by ID
+GET /api/v1/products/name/{name} - Get products by name
+GET /api/v1/products/category/{category} - Get products by category
+GET /api/v1/products/price/asc - Get products sorted by price ascending
+GET /api/v1/products/price/desc - Get products sorted by price descending
+POST /api/v1/products - Create a new product
+PUT /api/v1/products/{id} - Update an existing product
+DELETE /api/v1/products/{id} - Delete a product by ID
 ````
 
 ## Logging

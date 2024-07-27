@@ -42,7 +42,7 @@ class ProductControllerTest {
 
         when(productService.getProductById(1L)).thenReturn(product);
 
-        mockMvc.perform(get("/api/products/1"))
+        mockMvc.perform(get("/api/v1/products/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Product"))
@@ -60,7 +60,7 @@ class ProductControllerTest {
 
         when(productService.getProductByName("Product")).thenReturn(products);
 
-        mockMvc.perform(get("/api/products/name/Product"))
+        mockMvc.perform(get("/api/v1/products/name/Product"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Product"));
 
@@ -74,7 +74,7 @@ class ProductControllerTest {
 
         when(productService.getProductsByCategory("Category")).thenReturn(products);
 
-        mockMvc.perform(get("/api/products/category/Category"))
+        mockMvc.perform(get("/api/v1/products/category/Category"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].category").value("Category"));
 
@@ -88,7 +88,7 @@ class ProductControllerTest {
 
         when(productService.findAllProductsByPriceAsc()).thenReturn(products);
 
-        mockMvc.perform(get("/api/products/price/asc"))
+        mockMvc.perform(get("/api/v1/products/price/asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].price").value(100.0));
 
@@ -102,7 +102,7 @@ class ProductControllerTest {
 
         when(productService.findAllProductsByPriceDesc()).thenReturn(products);
 
-        mockMvc.perform(get("/api/products/price/desc"))
+        mockMvc.perform(get("/api/v1/products/price/desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].price").value(100.0));
 
@@ -116,7 +116,7 @@ class ProductControllerTest {
 
         when(productService.getAllProducts()).thenReturn(products);
 
-        mockMvc.perform(get("/api/products"))
+        mockMvc.perform(get("/api/v1/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Product"));
 
@@ -130,7 +130,7 @@ class ProductControllerTest {
 
         when(productService.saveProduct(any(Product.class))).thenReturn(product);
 
-        mockMvc.perform(post("/api/products")
+        mockMvc.perform(post("/api/v1/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(product)))
                 .andExpect(status().isOk())
@@ -144,7 +144,7 @@ class ProductControllerTest {
     void testDeleteProduct() throws Exception {
         doNothing().when(productService).deleteProduct(1L);
 
-        mockMvc.perform(delete("/api/products/1"))
+        mockMvc.perform(delete("/api/v1/products/1"))
                 .andExpect(status().isNoContent());
 
         verify(productService).deleteProduct(1L);
@@ -159,7 +159,7 @@ class ProductControllerTest {
 
         when(productService.updateProduct(eq(1L), any(Product.class))).thenReturn(updatedProduct);
 
-        mockMvc.perform(put("/api/products/1")
+        mockMvc.perform(put("/api/v1/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(updatedProduct)))
                 .andExpect(status().isOk())
@@ -174,7 +174,7 @@ class ProductControllerTest {
     void testGetProductByIdNotFound() throws Exception {
         when(productService.getProductById(1L)).thenThrow(ProductNotFoundException.class);
 
-        mockMvc.perform(get("/api/products/1"))
+        mockMvc.perform(get("/api/v1/products/1"))
                 .andExpect(status().isNotFound());
 
         verify(productService).getProductById(1L);
@@ -184,7 +184,7 @@ class ProductControllerTest {
     void testGetProductByNameNotFound() throws Exception {
         when(productService.getProductByName("NonExistentName")).thenThrow(ProductNotFoundException.class);
 
-        mockMvc.perform(get("/api/products/name/NonExistentName"))
+        mockMvc.perform(get("/api/v1/products/name/NonExistentName"))
                 .andExpect(status().isNotFound());
 
         verify(productService).getProductByName("NonExistentName");
@@ -194,7 +194,7 @@ class ProductControllerTest {
     void testGetProductByCategoryNotFound() throws Exception {
         when(productService.getProductsByCategory("NonExistentCategory")).thenThrow(ProductNotFoundException.class);
 
-        mockMvc.perform(get("/api/products/category/NonExistentCategory"))
+        mockMvc.perform(get("/api/v1/products/category/NonExistentCategory"))
                 .andExpect(status().isNotFound());
 
         verify(productService).getProductsByCategory("NonExistentCategory");
@@ -204,7 +204,7 @@ class ProductControllerTest {
     void testListAllProductsByPricesAscNotFound() throws Exception {
         when(productService.findAllProductsByPriceAsc()).thenThrow(ProductNotFoundException.class);
 
-        mockMvc.perform(get("/api/products/price/asc"))
+        mockMvc.perform(get("/api/v1/products/price/asc"))
                 .andExpect(status().isNotFound());
 
         verify(productService).findAllProductsByPriceAsc();
@@ -214,7 +214,7 @@ class ProductControllerTest {
     void testListAllProductsByPricesDescNotFound() throws Exception {
         when(productService.findAllProductsByPriceDesc()).thenThrow(ProductNotFoundException.class);
 
-        mockMvc.perform(get("/api/products/price/desc"))
+        mockMvc.perform(get("/api/v1/products/price/desc"))
                 .andExpect(status().isNotFound());
 
         verify(productService).findAllProductsByPriceDesc();
@@ -224,7 +224,7 @@ class ProductControllerTest {
     void testGetAllProductsNotFound() throws Exception {
         when(productService.getAllProducts()).thenThrow(ProductNotFoundException.class);
 
-        mockMvc.perform(get("/api/products"))
+        mockMvc.perform(get("/api/v1/products"))
                 .andExpect(status().isNotFound());
 
         verify(productService).getAllProducts();
@@ -234,7 +234,7 @@ class ProductControllerTest {
     void testDeleteProductNotFound() throws Exception {
         doThrow(ProductNotFoundException.class).when(productService).deleteProduct(1L);
 
-        mockMvc.perform(delete("/api/products/1"))
+        mockMvc.perform(delete("/api/v1/products/1"))
                 .andExpect(status().isNotFound());
 
         verify(productService).deleteProduct(1L);
@@ -247,7 +247,7 @@ class ProductControllerTest {
 
         when(productService.updateProduct(eq(1L), any(Product.class))).thenThrow(ProductNotFoundException.class);
 
-        mockMvc.perform(put("/api/products/1")
+        mockMvc.perform(put("/api/v1/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(product)))
                 .andExpect(status().isNotFound());
@@ -258,7 +258,7 @@ class ProductControllerTest {
     // Errors Tests
     @Test
     void testHandleMethodArgumentTypeMismatchException() throws Exception {
-        mockMvc.perform(get("/api/products/abc")) // Simulate invalid path variable
+        mockMvc.perform(get("/api/v1/products/abc")) // Simulate invalid path variable
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Invalid value 'abc' for parameter 'id'")); // Adjusted to match actual behavior
     }
@@ -269,7 +269,7 @@ class ProductControllerTest {
         // Simulate a situation where a generic exception would be thrown
         when(productService.getProductById(anyLong())).thenThrow(new RuntimeException("Unexpected error"));
 
-        mockMvc.perform(get("/api/products/1"))
+        mockMvc.perform(get("/api/v1/products/1"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("An unexpected error occurred. Please try again later."));
 
