@@ -1,19 +1,22 @@
 <configuration>
 
-    <property name="LOGS" value="logs"/>
+    <!-- Define the logs directory -->
+    <property name="LOGS" value="C:\Users\Upendra Panwar\Downloads\securityex\logs"/>
 
+    <!-- Console Appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <!-- File Appender -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>securityex/${LOGS}/app.log</file>
+        <file>${LOGS}/app.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover -->
+            <!-- Daily rollover -->
             <fileNamePattern>${LOGS}/app.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <!-- keep 30 days' worth of history -->
+            <!-- Keep 30 days' worth of history -->
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
@@ -21,20 +24,22 @@
         </encoder>
     </appender>
 
-    <!-- Logger for the application -->
+    <!-- Logger Configurations -->
     <logger name="com.securityexample.securityex" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>
 
-    <!-- Logger for handling exceptions, with no stack trace -->
     <logger name="com.securityexample.securityex.exception.GlobalExceptionHandler" level="ERROR" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>
 
-    <!-- Root logger with customized logging level -->
-    <root level="ERROR">
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.springframework.orm.jpa" level="WARN" />
+
+    <!-- Root Logger Configuration -->
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>

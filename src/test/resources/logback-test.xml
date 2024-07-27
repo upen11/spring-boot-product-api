@@ -1,0 +1,17 @@
+<configuration>
+
+    <property name="LOGS" value="C:\Users\Upendra Panwar\Downloads\securityex\logs"/>
+    <!-- Define the pattern and file name for test logs -->
+    <appender name="TEST_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOGS}/TestLogs/appTest.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+            <!-- Root logger configuration for test logs -->
+    <root level="INFO">
+    <appender-ref ref="TEST_FILE" />
+    </root>
+
+</configuration>
